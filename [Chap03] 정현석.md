@@ -1,0 +1,297 @@
+# Chap03. AWS 네트워킹 서비스
+## 3.1 네트워킹이란
+- 네트워킹(networking)
+    - ‘서로 연결한다’는 뜻으로, 서로 간에 의사소통을 하는 환경
+    - IT에서는 IT 자원 간 연결하여 통신하는 환경을 의미
+
+### 네트워킹 요소
+국제표준화기구(ISO)에서 개발한 **OSI 7계층 모델**
+
+![OSI 7계층][image1]
+
+[image1]: https://images.velog.io/images/xldksps4/post/980fe5d0-fcfe-4395-9148-0a110475ba26/image.png
+
+- **1계층 - 물리 계층**
+    - 네트워크 하드웨어 전송 기술을 이루는 계층
+    - 물리적으로 연결된 매체가 서로 데이터를 송수신할 수 있게 연결하고 유지
+- **2계층 - 데이터링크 계층**
+    - 물리 계층에서 송수신되는 정보의 오류와 흐름을 제어
+- **3계층 - 네트워크 계층**
+    - 데이터를 목적지까지 전달하는 계층
+    - 최적의 통신 경로를 찾음
+- **4계층 - 전송 계층**
+    - 종단의 대상 간에 데이터 전송을 다루는 계층
+    - 데이터 전송의 유효성과 효율성을 보장
+- **5계층 - 세션 계층**
+    - 종단의 대상 간 응용 프로세스 통신을 관리하는 방법
+    - 데이터 통신을 위한 논리적인 연결을 담당
+- **6계층 - 표현 계층**
+    - 데이터 형식에 차이가 있을 때 데이터를 서로 이해할 수 있는 형태로 변환하는 역할
+- **7계층 - 응용 계층**
+    - 응용 프로세스와 직접 연계하여 실제 응용 프로그램을 서비스하는 역할
+
+### IP 주소와 서브넷
+
+- **IP 주소**
+    - 인터넷상에서 IT 자원을 식별하는 고유한 주소
+    - IPv4와 IPv6 두 가지 버전이 있으며, 일반적으로 IPv4를 더 많이 사용
+    - IPv4는 10진수(0~255) 또는 2진수(0~1) 네 자리로 되어있으며, 각 자리는 온점(.)으로 구분해서 표현
+    - IPv4는 가용 범위가 부족하고 효율성이 떨어진다는 단점이 존재
+        - **퍼블릭 IP 주소**
+            
+            실제 인터넷에서 사용하려고 인터넷 서비스 공급자(ISP)에서 제공하는 유일한 공인 IP주소
+            
+        - **프라이빗 IP 주소**
+            
+            인터넷이 아닌 독립된 네트워크 내부에서만 사용하려고 네트워크 관리자가 제공하는 사설 IP 주소
+
+        > 💡 **프라이빗 IP 주소**는 **세 가지 클래스**로 범위가 정해져 있다.  
+        **· 클래스 A**: 10.0.0.0 ~ 10.255.255.255  
+        **· 클래스 B**: 172.16.0.0 ~ 172.31.255.255  
+        **· 클래스 C**: 192.168.0.0 ~ 192.168.255.255
+        
+        - **고정 IP 주소**
+            
+            네트워크 관리자가 수동으로 할당하는 방식
+            
+        - **유동 IP 주소**
+            
+            특정 서버가 IP 주소 범위에 따라 동적으로 할당하는 방식
+
+            DHCP(Dynamic Host Configuration Protocol) 프로토콜을 통해 주소를 제공하는 서버와 주소를 할당받는 클아이언트로 구성
+
+            IP 주소를 임대(lease)하는 형태를 취함
+
+> 💡 DHCP 프로토콜은 DHCP 서버와 DHCP 클라이언트 관계에 따라 동적으로 IP 주소를 할당  
+**· DHCP Discover**: DHCP 클라이언트에서 DHCP 서버를 찾는 메시지  
+**· DHCP Offer**: DHCP 서버에서 할당할 IP 주소와 임대 시간을 알리는 메시지  
+**· DHCP Request**: DHCP 클라이언트에서 DHCP 서버로 할당받을 IP 주소를 요청하는 메시지  
+**· DHCP Ack**: DHCP 서버에서 최종적으로 할당할 IP 주소 승인을 알리는 메시지
+        
+- **서브넷(subnet)**
+    - 부분 네트워크를 의미하며, 다양한 서브넷이 연결되어 거대한 네트워크 환경을 이루고 있다.
+- **서브넷 마스크(subnet mask)**
+    - 부분 네트워크인 서브넷을 구분하고 식별할 때 사용
+    - IP 주소와 동일한 32비트 구조에 **네트워크ID**와 **호스트ID로** 구성
+
+> **네트워크ID**: 서브넷을 구분하는 기준 값  
+**호스트ID**: 동일 서브넷 내에서 대상을 구분하는 기준 값
+
+### 라우팅과 라우터
+
+- **라우팅(routing)**
+    - 네트워킹 통신을 수행할 때 목적지 경로를 선택하는 작업
+- **라우터(router)**
+    - 라우팅을 수행하는 장비
+    - 라우팅 테이블이라는 서브넷의 경로 리스트를 가지고 목적지 네트워크에 대한 최적 경로를 선택해서 전달하는 역할
+
+![라우팅, 라우터, 라우팅 테이블][image2]
+
+[image2]: https://blog.kakaocdn.net/dn/l8wiD/btsythh02Wu/2Rg7liXayJJZMijmhkqfP1/img.png
+
+### TCP와 UDP
+
+- **TCP(Transmission Control Protocol)**
+    - 송수신 대상 간 연결을 맺고 데이터 전송 여부를 하나씩 확인하며 전송하는 연결형 프로토콜
+    - 신뢰성 있는 데이터 전송을 보장
+    - 신뢰성은 높아지지만 전송 속도는 느림
+- **UDP(User Diagram Protocol)**
+    - 송수신 대상 간 연결 없이 전달하는 비연결형 프로토콜
+    - 연결이나 제어를 위한 작업이 없어 신뢰성은 낮음
+    - 데이터를 빠르게 전송 가능
+
+![TCP와 UDP 차이점][image3]
+
+[image3]: https://blog.kakaocdn.net/dn/yhP4R/btskhaWJdn7/qJypbu4t4jVbAhXXQlaPD1/img.png
+
+### 포트 번호
+TCP와 UDP를 사용하는 응용 서비스는 서로 구분할 수 있도록 포트 번호를 사용  
+포트 번호는 IANA(Internet Assigned Numbers Authority)라는 인터넷 할당 번호 관리 기관에서 정의
+
+> 💡 IANA에서 정의하는 포트 번호 범위  
+**· 잘 알려진 포트 번호(well-known port)**: 0 ~ 1023  
+**· 등록된 포트 번호(registered port)**: 1024 ~ 49151  
+**· 동적 포트(dynamic port)**: 49152 ~ 65535
+
+
+## 3.2 AWS 네트워킹 소개
+- **AWS 네트워킹 서비스**
+    - AWS 글로벌 인프라에서 생성된 다양한 자원의 워크로드를 수행하는 네트워킹 서비스
+
+### AWS 리전 네트워킹 디자인
+- **리전**
+    - 전 세계 주요 도시의 데이터 센터를 군집화하는 물리적인 위치
+    - 리전 내부에는 **논리적인 데이터 센터의 집합인 가용 영역**이 존재
+    - 외부 인터넷 구간과 통신이 필요할 때는 트랜짓 센터를 통해 통신
+
+AWS 리전 내부에는 트랜짓 센터(transit center)와 가용 영역이 서로 연결되어 네트워크 환경을 이룸
+
+네트워킹 측면으로 어떤 대상과 연결되었는지에 따라 다음과 같이 분류
+
+- **Intra-AZ 연결**
+    - 가용 영역에 존재하는 데이터 센터들은 고밀도 광섬유 케이블을 사용하여 100GE 또는 400GE로 상호 연결되어 네트워킹 환경을 구성하는데, 이런 데이터 센터 간의 연결
+- **Inter-AZ 연결**
+    - 정전이나 자연재해 같은 문제에 가용서을 유지하기 위하여 리전 내부의 가용 영역은 실제 100km 이내로 떨어져 있음
+    - 지리적으로 떨어져 있는 가용 영역끼리 연결되어 네트워킹 환경을 구성하고 있으며, 이런 가용 영역 간 연결
+- **트랜짓 센터 연결**
+    - 내부에 있는 가용 영역들은 외부 인터넷 통신을 위해 트랜짓 센터와 연결되어 네트워킹 환경을 구성하며, 이런 가용 영역 간 연결
+
+### AWS 글로벌 네트워크와 엣지 POP
+- **엣지 POP**
+    - AWS 글로벌 네트워크라는 전용망을 활용하여 안정적으로 고성능 서비스를 제공하는 센터
+    - 사용자에게 글로벌 서비스 콘텐츠를 빠르게 제공 가능
+    - 엣지 로케이션(edge location)과 리전별 엣지 캐시(regional edge cache)로 구성
+        - 전 세계 300개 이상의 **엣지 로케이션**과 13개의 **리전별 엣지 캐시**가 서로 연결된 AWS 글로벌 네트워크를 구성
+
+엣지 POP가 속해 있는 AWS 백본 네트워크는 AWS 글로벌 네트워크와 연결되어 있으며, 모든 리전(중국 리전 제외)은 백본 네트워크를 중심으로 서로 연결
+
+**① 일반적인 서비스**: 트랜짓 센터에서 인터넷  구간으로 통신
+
+**② 엣지 POP를 활용한 서비스**: 트랜짓 센터에서 AWS 백본 네트워크를 통해 엣지 POP를 경유하고 AWS 글로벌 네트워크로 통신
+
+> 💡 백본 네트워크는 다양한 네트워크를 상호 연결하는 컴퓨터 네트워크 일부로, 정보를 교환할 수 있는 경로를 제공
+
+
+### AWS 네트워킹 서비스 소개
+
+AWS의 다양한 자원이 서로 원할하게 통신할 수 있도록 도와주는 것이 AWS 네트워킹 서비스이다.
+
+![AWS 네트워킹 서비스][image4]
+
+[image4]: https://velog.velcdn.com/images/binest03459/post/1ceb65d2-8019-4837-9f8a-802f5e7ee23f/image.png
+
+- **VPC**
+    - 사용자 전용 가상의 프라이빗 클라우드 네트워크
+    - 네트워크 자원을 탄력적으로 활용하는 서비스를 제공
+- **Transit Gateway**
+    - 중앙 허브 개념처럼 VPC와 온프레미스 네트워크를 연결하는 게이트웨이 역할의 서비스를 제공
+- **Route 53**
+    - AWS에서 제공하는 관리형 DNS 서비스
+    - 도메인 등록, 라우팅, 상태 확인 등 서비스를 제공
+- **Global Accelerator**
+    - AWS 글로벌 네트워크를 통해 애플리케이션을 빠르고 안정적으로 사용할 수 있도록 가용성 및 성능을 보장하는 서비스를 제공
+- **Direct Connect**
+    - 온프레미스 환경에서 AWS와 전용 네트워크 연결 서비스를 제공
+- **Site-to-Site VPN**
+    - IPsec VPN 연결을 생성하여 암호화된 네트워크를 구성하는 서비스를 제공
+
+## 3.3 Amazon VPC 소개
+- **Amazon VPC(Virtual Private Cloud)**
+    - 사용자 정의로 구성된 가상의 프라이빗 클라우드 네트워크
+    - 사용자는 Amazon VPC에서 제공하는 다양한 네트워킹 요소를 이용하여 가상의 클라우드 네트워크를 구성 가능
+
+### Amazon VPC 기본 구성 요소
+- **리전과 VPC**
+    - Amazon VPC는 리전마다 독립적으로 구성
+        - VPC는 독립된 가상의 클라우드 네트워크
+    - 리전 내에는 다수의 VPC를 생성할 수 있으며, 각 VPC는 서로 독립적으로 분리
+
+![VPC의 독립적 구성][image5]
+
+[image5]: https://velog.velcdn.com/images/choral/post/2a90db27-503e-4f62-9bd4-39d920743815/image.png
+
+> 💡 독립적으로 구성된 VPC는 필요에 따라 동일 리전이나 다른 리전에 위치한 VPC들을 서로 연결하여 클라우드 네트워크를 확장 가능
+
+Amazon VPC라는 하나의 독립된 클라우드 네트워크에도 서브넷을 이용하여 분리된 네트워크로 구성 가능
+
+- **서브넷과 가용 영역**
+    - **서브넷**
+        - VPC 내 별도로 나누어진 네트워크
+        - 반드시 하나의 가용 영역에 종속적으로 위치
+
+![VPC 내 서브넷과 가용 영역][image6]
+
+[image6]: https://docs.aws.amazon.com/ko_kr/vpc/latest/userguide/images/how-it-works.png
+
+서브넷은 VPC 네트워크 환경 구성에 따라 **퍼블릭 서브넷**과 **프라이빗 서브넷**으로 분류
+
+- **퍼블릭 서브넷**
+    - 인터넷 구간과 연결되어 있어 외부 인터넷 통신이 가능한 네트워크 영역
+- **프라이빗 서브넷**
+    - 인터넷 구간과 연결되지 않은 폐쇄적인 네트워크 영역
+- **IP CIDR**
+    - 네트워크에 할당할 수 있는 IP 주소 범위를 표현하는 방법
+    - 서브넷에 생성되는 자원은 IP CIDR 범위 안에 있는 IP 주소를 할당 받을 수 있다.
+
+Amazon VPC는 내부에 생성할 서브넷의 IP 주소 범위를 할당하기 위해 IP CIDR을 가지고 있다.
+
+VPC 내 생성된 서브넷도 VPC의 IP CIDR에서 분할된 IP CIDR을 가지고 있다.
+
+- **가상 라우터와 라우팅 테이블**
+    - Amazon VPC를 생성하면 기본적으로 네트워크 경로를 확인하여 트래픽을 전달하는 목적의 가상 라우터가 생성
+    - 생성된 가상 라우터는 기본 라우팅 테이블을 보유
+    - 라우팅 테이블을 통해 네트워크 경로를 식별
+
+> 기본 라우팅 테이블 외에 별도의 라우팅 테이블을 생성할 수 있고, 생성된 라우팅 테이블은 서브넷과 연결하여 서브넷 마다 라우팅 테이블을 가질 수도 있다.
+
+![VPC의 가상 라우터와 라우팅 테이블][image7]
+
+[image7]: https://miro.medium.com/v2/resize:fit:2000/1*I_3RxWyOPMj9lQs1xhEebg.png
+
+### **보안 그룹과 네트워크 ACL(Access Control List)**
+
+- Amazon VPC는 보안 그룹과 네트워크 ACL과 같은 가상의 방화벽 기능을 제공
+- 트래픽 접근을 통제하는 것이 주된 목적
+- IP CIDR 블록, 프로토콜, 포트 번호 등을 정의하여 허용과 거부를 결정하는 보안 규칙 생성
+- 가상의 방화벽을 기준으로 들어오는 **인바운드 규칙**과 빠져나가는 **아웃바운드 규칙**이 있다.
+
+**보안 그룹과 네트워크 ACL의 차이점**
+
+- **트래픽 접근 제어 대상**
+    - **보안 그룹**은 인스턴스와 같은 자원 접근을 제어
+    - **네트워크 ACL**은 서브넷 접근을 제어
+
+![보안 그룹과 네트워크 ACL][image8]
+
+[image8]: https://blog.kakaocdn.net/dn/csGXtR/btrk6MOuOnZ/u2ixxijyqFcZ6XZvLPUrbK/img.png
+
+- **스테이트풀(stateful)**
+    - **보안 그룹**은 이전 상태 정보를 기억하고 다음에 그 상태를 활용하는 스테이트풀 접근 통제를 수행
+- **스테이트리스(stateless)**
+    - **네트워크 ACL**은 이전 상태 정보를 기억하지 않아 다음에 그 상태를 활용하지 않는 스테이트리스 접근 통제를 수행
+
+    ![인바운드, 아웃바운드][image9]
+
+    [image9]: data:image/jpeg;base64,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
+
+    - 인바운드 규칙에 따라 트래픽을 허용한 경우 정보를 기억하고 아웃바운드 규칙에 상관없이 자동으로 접근이 허용
+
+    - 인바운드 규칙에 따라 트래픽을 허용했어도 아웃바운드 규칙으로 트래픽 허용 여부를 판단
+
+- **보안그룹의 정책 테이블**
+    - 허용 규칙만 나열하며 허용 규칙에 해당하지 않으면 자동 거부
+- **네트워크 ACL의 정책 테이블**
+    - 허용 규칙과 거부 규칙이 모두 존재하여 규칙을 순차적으로 확인하고 허용과 거부를 판단
+    - 모든 규칙이 매칭되지 않으면 거부하는 규칙이 기본적으로 제공
+
+### Amazon VPC와 다른 네트워크 연결
+
+Amazon VPC의 독립된 클라우드 네트워크에서 다른 네트워크와 연결하는 다양한 기능들
+
+- **인터넷 게이트웨이**
+    - VPC와 인터넷 구간의 논리적인 연결이자 인터넷으로 나가는 관문이 되는 네트워킹 자원
+    - 외부 인터넷 구간과 연결이 필요하면 인터넷 게이트웨이라는 네트워킹 자원을 생성한 후 Amazon VPC와 연결하여 외부 인터넷과 통신
+    - 서브넷의 라우팅 테이블에서 외부 인터넷으로 나가는 타깃 대상을 인터넷 게이트웨이로 지정하여 퍼블릭 서브넷 환경을 구축
+
+- **NAT 게이트웨이**
+    - 프라이빗 서브넷에서 외부 인터넷으로 통신하는 관문 역할
+    - IP주소를 변환하는 기능을 제공
+    - 프라이빗 IP주소를 퍼블릭 IP 주소로 변환하여 외부 인터넷 구간  통신 환경을 구축
+
+_프라이빗 서브넷에서 출발하여 NAT 게이트웨이를 통해 외부 인터넷 구간으로 도착할 수 있지만, 외부 인터넷 구간에서 출발하여 프라이비 서브넷으로 도착할 수는 없다._
+
+> 💡 NAT 게이트웨이는 프라이빗 서브넷의 외부 인터넷 구간을 돕는 역할을 하지만 실제 인터넷 게이트웨이와 연결된 퍼블릭 서브넷에 위치
+
+
+- **VPC 피어링**
+    - 서로 다른 VPC를 연결하는 기능
+    - 동일 리전뿐만 아니라 다른 리전에 위치한 VPC와 다른 계정에 위치한 VPC까지도 연결 가능
+
+> 💡 VPC 피어링으로 연결할 경우 IP CIDR 블록이 중복되면 연결이 불가능한 제약이 있어 VPC 피어링으로 클라우드 네트워크를 확장할 때는 IP 주소 대역을 반드시 점검해야 한다.
+
+- **전송 게이트웨이(transit gateway)**
+    - 다수의 VPC나 온프레미스를 단일 지점으로 연결하는 중앙 집중형 라우터
+    - 단일 지점 연결이라 네트워크 구성이 간소화되고 비용이 절감되는 장점
+
+- **가상 프라이빗 게이트웨이**
+    - 관리형 AWS Site-to-Site VPN을 연결하거나 AWS Direct Connect로 온프레미스 환경을 연결
